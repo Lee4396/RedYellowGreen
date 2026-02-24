@@ -11,9 +11,6 @@ namespace backend.Controllers
     {
         private static readonly List<CentralLocation> _locations = new();
 
-        // --------------------
-        // POST: Admin creates equipments
-        // --------------------
         [HttpPost]
         public IActionResult Create([FromBody] CentralLocationDto dto)
         {
@@ -25,19 +22,15 @@ namespace backend.Controllers
 
             foreach (var eqDto in dto.Equipments ?? Enumerable.Empty<EquipmentDto>())
             {
-                centralLocation.AddEquipment(new Equipment(eqDto.Id));  // ProductionState defaults to Red
+                centralLocation.AddEquipment(new Equipment(eqDto.Id));
             }
 
             centralLocation.Initialize();
             _locations.Add(centralLocation);
 
-            // Admin sees IDs only
-            var response = centralLocation.Equipments
-                .Select(e => new
-                {
-                    e.Id
-                })
-                .ToList();
+            var response = _locations.SelectMany(loc => loc.Equipments)
+                                     .Select(e => new { e.Id })
+                                     .ToList();
 
             return Ok(new
             {
@@ -46,9 +39,6 @@ namespace backend.Controllers
             });
         }
 
-        // --------------------
-        // GET: Worker sees state, Admin sees IDs only
-        // --------------------
         [HttpGet]
         public IActionResult GetAllEquipments()
         {
@@ -63,57 +53,87 @@ namespace backend.Controllers
                 return Ok(equipments.Select(e => new { e.Id }));
             }
 
+            if (role == Role.Supervisor)
+            {
+                return Ok(equipments.Select(e => new
+                {
+                    e.Id,
+                    HistProductionStates = e.HistProductionStates,
+                    CurrentOrderId = e.CurrentOrder?.Id
+                }));
+            }
+
             if (role == Role.Worker)
             {
                 return Ok(equipments.Select(e => new
                 {
                     e.Id,
-                    ProductionState = e.ProductionState.ToString(),
-                    ProductionStateDescription = EnumHelper.GetDescription(e.ProductionState)
+                    CurrentProductionState = e.CurrentProductionState.ToString(),
+                    CurrentOrderId = e.CurrentOrder?.Id,
+                    ScheduledOrders = e.Orders.Select(o => o.Id).ToList(),
+                    HistProductionStates = e.HistProductionStates
                 }));
             }
 
             return Forbid();
         }
 
-        // --------------------
-        // PUT: Worker batch update states
-        // --------------------
-        [HttpPut("batch")]
-        public IActionResult UpdateBatch([FromBody] List<UpdateEquipmentDto> updates)
+        [HttpPut("record/{equipmentId}")]
+        public IActionResult RecordState(int equipmentId, [FromBody] RecordStateDto dto)
         {
             var roleHeader = Request.Headers["Role"].FirstOrDefault();
             if (!Enum.TryParse<Role>(roleHeader, out var role) || role != Role.Worker)
                 return Forbid();
 
-            if (updates == null || !updates.Any())
-                return BadRequest("No updates provided");
+            var equipment = _locations.SelectMany(loc => loc.Equipments)
+                                      .FirstOrDefault(e => e.Id == equipmentId);
+            if (equipment == null) return NotFound();
 
-            foreach (var update in updates)
+            if (!Enum.TryParse<ProductionState>(dto.State, out var newState))
+                return BadRequest();
+
+            equipment.RecordState(newState);
+
+            return Ok(new
             {
-                var equipment = _locations
-                    .SelectMany(loc => loc.Equipments)
-                    .FirstOrDefault(e => e.Id == update.Id);
+                equipment.Id,
+                CurrentOrderId = equipment.CurrentOrder?.Id,
+                CurrentProductionState = equipment.CurrentProductionState,
+                HistProductionStates = equipment.HistProductionStates
+            });
+        }
 
-                if (equipment == null) continue;
+        [HttpPut("schedule/{equipmentId}")]
+        public IActionResult ScheduleOrders(int equipmentId, [FromBody] ScheduleOrdersDto dto)
+        {
+            var roleHeader = Request.Headers["Role"].FirstOrDefault();
+            if (!Enum.TryParse<Role>(roleHeader, out var role) || role != Role.Supervisor)
+                return Forbid();
 
-                if (!Enum.TryParse<ProductionState>(update.ProductionState, out var newState))
-                    continue;
+            var equipment = _locations.SelectMany(loc => loc.Equipments)
+                                      .FirstOrDefault(e => e.Id == equipmentId);
+            if (equipment == null) return NotFound();
 
-                equipment.ProductionState = newState;
-            }
+            if (equipment.Orders.Count > 0)
+                return BadRequest("Orders already scheduled");
 
-            var allEquipments = _locations
-                .SelectMany(loc => loc.Equipments)
-                .Select(e => new
-                {
-                    e.Id,
-                    ProductionState = e.ProductionState.ToString(),
-                    ProductionStateDescription = EnumHelper.GetDescription(e.ProductionState)
-                })
-                .ToList();
+            var defaultSequence = new List<ProductionState> { ProductionState.Red, ProductionState.Yellow, ProductionState.Green, ProductionState.Yellow, ProductionState.Red };
 
-            return Ok(allEquipments);
+            var orders = Enumerable.Range(1, dto.NumberOfOrders)
+                                   .Select(i => new Order
+                                   {
+                                       Id = i,
+                                       EquipmentId = equipmentId,
+                                       ProductionStates = defaultSequence
+                                   }).ToList();
+
+            equipment.ScheduleOrders(orders);
+
+            return Ok(new
+            {
+                equipment.Id,
+                ScheduledOrders = equipment.Orders.Select(o => o.Id)
+            });
         }
     }
 }

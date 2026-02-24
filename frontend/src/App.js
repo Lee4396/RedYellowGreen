@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CentralLocationSetup from './components/centralLocationSetup';
 
 function App() {
-  const [role, setRole] = React.useState('Admin'); // default to Admin
+  const [role, setRole] = useState('Admin');
 
   return (
     <div>
-      <h1>Red, yellow, green</h1>
+      <h1>Red, Yellow, Green Production</h1>
       <label>Role: </label>
       <select value={role} onChange={e => setRole(e.target.value)}>
         <option value="Admin">Admin</option>
+        <option value="Supervisor">Supervisor</option>
         <option value="Worker">Worker</option>
       </select>
 
