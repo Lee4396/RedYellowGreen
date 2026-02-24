@@ -10,7 +10,7 @@ namespace backend.Models
         {
             if (_equipments.Count == 0)
             {
-                _equipments.Add(new Equipment { Id = 1 });
+                _equipments.Add(new Equipment(1));
             }
         }
 

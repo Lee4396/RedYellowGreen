@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using backend.Models;
+using backend.Dtos;
 using System.Linq;
 
 namespace backend.Controllers
@@ -24,11 +25,7 @@ namespace backend.Controllers
 
             foreach (var eqDto in dto.Equipments ?? Enumerable.Empty<EquipmentDto>())
             {
-                centralLocation.AddEquipment(new Equipment
-                {
-                    Id = eqDto.Id
-                    // ProductionState defaults to Red
-                });
+                centralLocation.AddEquipment(new Equipment(eqDto.Id));  // ProductionState defaults to Red
             }
 
             centralLocation.Initialize();
@@ -118,24 +115,5 @@ namespace backend.Controllers
 
             return Ok(allEquipments);
         }
-    }
-
-    // --------------------
-    // DTOs
-    // --------------------
-    public class CentralLocationDto
-    {
-        public List<EquipmentDto> Equipments { get; set; } = new();
-    }
-
-    public class EquipmentDto
-    {
-        public int Id { get; set; }
-    }
-
-    public class UpdateEquipmentDto
-    {
-        public int Id { get; set; }
-        public string ProductionState { get; set; } = string.Empty;
     }
 }

@@ -4,5 +4,10 @@ namespace backend.Models
     {
         public int Id { get; set; }
         public ProductionState ProductionState { get; set; } = ProductionState.Red;
+
+        public Equipment(int id)
+        {
+            Id = id;
+        }
     }
 }
