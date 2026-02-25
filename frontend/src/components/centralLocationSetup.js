@@ -126,21 +126,18 @@ const css = `
     border: 1px solid;
   }
 
-  .role-chip.admin   { background: #fff8eb; color: #9a5c00; border-color: #f0d898; }
+  .role-chip.admin      { background: #fff8eb; color: #9a5c00; border-color: #f0d898; }
   .role-chip.supervisor { background: #ebf4ff; color: #1a5ea8; border-color: #a8ccf0; }
-  .role-chip.worker  { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .role-chip.worker     { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
 
-  .role-chip-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-  }
-  .role-chip.admin   .role-chip-dot { background: #c47a10; }
-  .role-chip.supervisor .role-chip-dot { background: #2a6abf; box-shadow: 0 0 0 2px #a8ccf040; }
-  .role-chip.worker  .role-chip-dot { background: var(--green); box-shadow: 0 0 0 2px #2a8a5220; animation: pulse 2s infinite; }
+  .role-chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .role-chip.admin      .role-chip-dot { background: #c47a10; }
+  .role-chip.supervisor .role-chip-dot { background: #2a6abf; }
+  .role-chip.worker     .role-chip-dot { background: var(--green); animation: pulse 2s infinite; }
 
   @keyframes pulse {
     0%, 100% { box-shadow: 0 0 0 2px #2a8a5220; }
-    50% { box-shadow: 0 0 0 5px #2a8a5210; }
+    50%       { box-shadow: 0 0 0 5px #2a8a5210; }
   }
 
   /* ── LAYOUT ── */
@@ -150,9 +147,7 @@ const css = `
     padding: 36px 24px 80px;
   }
 
-  .page-heading {
-    margin-bottom: 28px;
-  }
+  .page-heading { margin-bottom: 28px; }
 
   .page-heading h1 {
     font-family: 'Syne', sans-serif;
@@ -181,10 +176,7 @@ const css = `
     transition: box-shadow 0.2s, border-color 0.2s;
   }
 
-  .card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--border2);
-  }
+  .card:hover { box-shadow: var(--shadow-md); border-color: var(--border2); }
 
   .card-head {
     padding: 18px 22px 14px;
@@ -195,11 +187,7 @@ const css = `
     justify-content: space-between;
   }
 
-  .card-head-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+  .card-head-left { display: flex; align-items: center; gap: 10px; }
 
   .card-icon {
     width: 32px; height: 32px;
@@ -221,15 +209,8 @@ const css = `
     letter-spacing: -0.2px;
   }
 
-  .card-subtitle {
-    font-size: 12px;
-    color: var(--text3);
-    margin-top: 1px;
-  }
-
-  .card-body {
-    padding: 22px;
-  }
+  .card-subtitle { font-size: 12px; color: var(--text3); margin-top: 1px; }
+  .card-body { padding: 22px; }
 
   /* ── EQUIPMENT BLOCK ── */
   .eq-block {
@@ -257,11 +238,7 @@ const css = `
     justify-content: space-between;
   }
 
-  .eq-block-id {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+  .eq-block-id { display: flex; align-items: center; gap: 10px; }
 
   .eq-number-badge {
     width: 34px; height: 34px;
@@ -282,14 +259,8 @@ const css = `
     color: var(--text);
   }
 
-  .eq-meta {
-    font-size: 12px;
-    color: var(--text3);
-  }
-
-  .eq-block-body {
-    padding: 18px 20px;
-  }
+  .eq-meta { font-size: 12px; color: var(--text3); }
+  .eq-block-body { padding: 18px 20px; }
 
   /* ── STATE INDICATOR ── */
   .state-indicator {
@@ -304,9 +275,9 @@ const css = `
     transition: all 0.2s;
   }
 
-  .state-indicator.Red    { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .state-indicator.Red    { background: var(--red-bg);    color: var(--red);    border-color: var(--red-border); }
   .state-indicator.Yellow { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow-border); }
-  .state-indicator.Green  { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .state-indicator.Green  { background: var(--green-bg);  color: var(--green);  border-color: var(--green-border); }
 
   .state-dot {
     width: 8px; height: 8px;
@@ -320,8 +291,103 @@ const css = `
 
   @keyframes pulse-green {
     0%, 100% { box-shadow: 0 0 0 3px var(--green-border); }
-    50% { box-shadow: 0 0 0 6px rgba(42,138,82,0.15); }
+    50%       { box-shadow: 0 0 0 6px rgba(42,138,82,0.15); }
   }
+
+  /* ── SEQUENCE STEPPER (Supervisor order state visualization) ── */
+  .sequence-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .sequence-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    position: relative;
+  }
+
+  .sequence-step::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  .sequence-step:last-child::after { display: none; }
+
+  .sequence-step-circle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    z-index: 1;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .sequence-step-circle.done {
+    border-color: transparent;
+  }
+
+  .sequence-step-circle.done.Red    { background: var(--red);    color: white; }
+  .sequence-step-circle.done.Yellow { background: var(--yellow); color: white; }
+  .sequence-step-circle.done.Green  { background: var(--green);  color: white; }
+
+  .sequence-step-circle.active {
+    border-width: 2px;
+    box-shadow: 0 0 0 3px;
+  }
+
+  .sequence-step-circle.active.Red    { border-color: var(--red);    color: var(--red);    box-shadow: 0 0 0 3px var(--red-border); }
+  .sequence-step-circle.active.Yellow { border-color: var(--yellow); color: var(--yellow); box-shadow: 0 0 0 3px var(--yellow-border); }
+  .sequence-step-circle.active.Green  { border-color: var(--green);  color: var(--green);  box-shadow: 0 0 0 3px var(--green-border); }
+
+  .sequence-step-circle.pending {
+    background: var(--surface2);
+    color: var(--text3);
+    border-color: var(--border);
+  }
+
+  .sequence-step-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .sequence-step-label.active-label { color: var(--text2); font-weight: 500; }
+
+  .sequence-connector {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin-bottom: 22px;
+    flex-shrink: 0;
+    max-width: 24px;
+    transition: background 0.3s;
+  }
+
+  .sequence-connector.done { background: var(--green); }
 
   /* ── HISTORY STRIP ── */
   .history-wrap {
@@ -348,11 +414,7 @@ const css = `
     flex-wrap: wrap;
   }
 
-  .history-step {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-  }
+  .history-step { display: flex; align-items: center; gap: 3px; }
 
   .history-pip {
     width: 22px; height: 22px;
@@ -361,23 +423,18 @@ const css = `
     font-family: 'DM Mono', monospace;
     font-size: 9px;
     font-weight: 500;
-    letter-spacing: 0;
     flex-shrink: 0;
     border: 1px solid;
     transition: transform 0.15s;
+    cursor: default;
   }
 
   .history-pip:hover { transform: scale(1.15); }
-
   .history-pip.Red    { background: var(--red-bg);    color: var(--red);    border-color: var(--red-border); }
   .history-pip.Yellow { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow-border); }
   .history-pip.Green  { background: var(--green-bg);  color: var(--green);  border-color: var(--green-border); }
 
-  .history-arrow {
-    color: var(--border2);
-    font-size: 10px;
-    flex-shrink: 0;
-  }
+  .history-arrow { color: var(--border2); font-size: 10px; flex-shrink: 0; }
 
   /* ── ORDER PILLS ── */
   .order-row {
@@ -420,9 +477,7 @@ const css = `
   }
 
   /* ── FORM ELEMENTS ── */
-  .field {
-    margin-bottom: 14px;
-  }
+  .field { margin-bottom: 14px; }
 
   .field-label {
     display: block;
@@ -433,11 +488,7 @@ const css = `
     letter-spacing: 0.2px;
   }
 
-  .field-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .field-row { display: flex; align-items: center; gap: 8px; }
 
   .field-prefix {
     font-family: 'DM Mono', monospace;
@@ -480,9 +531,7 @@ const css = `
   }
 
   /* ── SELECT ── */
-  .select-wrap {
-    position: relative;
-  }
+  .select-wrap { position: relative; }
 
   select {
     appearance: none;
@@ -515,10 +564,42 @@ const css = `
     font-size: 11px;
   }
 
-  /* state-colored select */
   select.state-Red    { border-color: var(--red-border);    background: var(--red-bg); }
   select.state-Yellow { border-color: var(--yellow-border); background: var(--yellow-bg); }
   select.state-Green  { border-color: var(--green-border);  background: var(--green-bg); }
+
+  /* Locked option styling */
+  option:disabled {
+    color: var(--border2);
+    background: var(--surface2);
+  }
+
+  /* ── NEXT STATE BANNER ── */
+  .next-state-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    border: 1px solid;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .next-state-banner.Red    { background: var(--red-bg);    color: var(--red);    border-color: var(--red-border); }
+  .next-state-banner.Yellow { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow-border); }
+  .next-state-banner.Green  { background: var(--green-bg);  color: var(--green);  border-color: var(--green-border); }
+  .next-state-banner.none   { background: var(--surface2);  color: var(--text3);  border-color: var(--border); }
+
+  .next-state-banner-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-right: 2px;
+  }
 
   /* ── BUTTONS ── */
   .btn {
@@ -580,11 +661,7 @@ const css = `
     transform: none;
   }
 
-  .btn-block {
-    width: 100%;
-    padding: 12px;
-    font-size: 14px;
-  }
+  .btn-block { width: 100%; padding: 12px; font-size: 14px; }
 
   .btn-row {
     display: flex;
@@ -594,12 +671,7 @@ const css = `
   }
 
   /* ── REGISTERED IDS LIST ── */
-  .ids-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
-  }
+  .ids-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 
   .id-chip {
     background: var(--surface2);
@@ -619,23 +691,11 @@ const css = `
   }
 
   /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text3);
-  }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
+  .empty-state-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
 
-  .empty-state-icon {
-    font-size: 36px;
-    margin-bottom: 12px;
-    opacity: 0.5;
-  }
-
-  .empty-state p {
-    font-size: 14px;
-  }
-
-  /* ── MESSAGE BAR ── */
+  /* ── TOAST ── */
   .toast {
     display: flex;
     align-items: center;
@@ -679,10 +739,7 @@ const css = `
     transition: all 0.2s;
   }
 
-  .stat-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-  }
+  .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 
   .stat-value {
     font-family: 'Syne', sans-serif;
@@ -706,14 +763,9 @@ const css = `
   .stat-green  { color: var(--green); }
   .stat-yellow { color: var(--yellow); }
 
-  /* ── DIVIDER ── */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 18px 0;
-  }
+  /* ── MISC ── */
+  .divider { height: 1px; background: var(--border); margin: 18px 0; }
 
-  /* ── SECTION LABEL ── */
   .section-label {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -723,19 +775,10 @@ const css = `
     margin-bottom: 10px;
   }
 
-  /* ── INLINE INPUT ROW ── */
-  .inline-row {
-    display: flex;
-    gap: 8px;
-    align-items: stretch;
-  }
-
+  .inline-row { display: flex; gap: 8px; align-items: stretch; }
   .inline-row input { flex: 1; }
 
-  /* ── FADE IN ANIMATION ── */
-  .fade-in {
-    animation: fadeIn 0.4s ease both;
-  }
+  .fade-in { animation: fadeIn 0.4s ease both; }
 
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -749,9 +792,7 @@ const css = `
   .stagger-5 { animation-delay: 0.25s; }
 
   /* ── PROGRESS BAR ── */
-  .progress-wrap {
-    margin-top: 10px;
-  }
+  .progress-wrap { margin-top: 10px; }
 
   .progress-bar-bg {
     background: var(--surface2);
@@ -794,8 +835,10 @@ const css = `
 `;
 
 /* ─────────────────────────────────────────────
-   HELPERS
+   CONSTANTS
 ───────────────────────────────────────────── */
+const REQUIRED_SEQUENCE = ['Red', 'Yellow', 'Green', 'Yellow', 'Red'];
+
 const STATE_ABBR  = { Red: 'R', Yellow: 'Y', Green: 'G' };
 const STATE_LABEL = { Red: 'Standing Still', Yellow: 'Starting Up / Winding Down', Green: 'Producing Normally' };
 const ROLE_ICONS  = { Admin: '⚙', Supervisor: '📋', Worker: '🔧' };
@@ -806,8 +849,19 @@ const SUBTITLES   = {
   Worker:     'Monitor and update production states in real-time'
 };
 
-function StateDot({ state, animated }) {
-  return <span className={`state-dot ${state}${animated ? '' : ''}`} />;
+/* ─────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────── */
+
+// Sanitize number input: strip leading zeros, clamp to min 1
+function sanitizeNumberInput(raw) {
+  const str = String(raw).replace(/^0+/, '') || '1';
+  const n = parseInt(str, 10);
+  return isNaN(n) ? 1 : Math.max(1, n);
+}
+
+function StateDot({ state }) {
+  return <span className={`state-dot ${state}`} />;
 }
 
 function StateIndicator({ state }) {
@@ -855,11 +909,62 @@ function OrderRow({ currentOrderId, scheduledOrders }) {
   );
 }
 
+// Visualizes the 5-step sequence [R, Y, G, Y, R] showing done / active / pending
+function SequenceStepper({ currentStateIndex }) {
+  // currentStateIndex: 0-based index into REQUIRED_SEQUENCE, or null if no active order
+  const activeIdx = currentStateIndex ?? -1;
+
+  return (
+    <div className="sequence-stepper">
+      {REQUIRED_SEQUENCE.map((state, i) => {
+        const isDone   = i < activeIdx;
+        const isActive = i === activeIdx;
+        const circleClass = isDone ? `done ${state}` : isActive ? `active ${state}` : 'pending';
+        const labelClass  = isActive ? 'active-label' : '';
+
+        return (
+          <React.Fragment key={i}>
+            <div className="sequence-step">
+              <div className={`sequence-step-circle ${circleClass}`}>
+                {STATE_ABBR[state]}
+              </div>
+              <div className={`sequence-step-label ${labelClass}`}>
+                {state}
+              </div>
+            </div>
+            {i < REQUIRED_SEQUENCE.length - 1 && (
+              <div className={`sequence-connector ${isDone ? 'done' : ''}`} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+// Shows the one next state the Worker must set, with a lock message
+function NextStateBanner({ nextExpectedState }) {
+  if (!nextExpectedState) {
+    return (
+      <div className="next-state-banner none">
+        <span className="next-state-banner-label">Next</span>
+        No active order — all orders complete
+      </div>
+    );
+  }
+  return (
+    <div className={`next-state-banner ${nextExpectedState}`}>
+      <StateDot state={nextExpectedState} />
+      <span className="next-state-banner-label">Required next</span>
+      {STATE_LABEL[nextExpectedState]} ({nextExpectedState})
+    </div>
+  );
+}
+
 function StatsBar({ equipments, role }) {
-  const total   = equipments.length;
-  const green   = equipments.filter(e => e.currentProductionState === 'Green').length;
-  const yellow  = equipments.filter(e => e.currentProductionState === 'Yellow').length;
-  const red     = equipments.filter(e => e.currentProductionState === 'Red').length;
+  const total      = equipments.length;
+  const green      = equipments.filter(e => e.currentProductionState === 'Green').length;
+  const red        = equipments.filter(e => e.currentProductionState === 'Red').length;
   const withOrders = equipments.filter(e => e.currentOrderId != null).length;
 
   if (total === 0) return null;
@@ -889,11 +994,11 @@ function StatsBar({ equipments, role }) {
       </div>
       <div className="stat-card fade-in stagger-2">
         <div className={`stat-value ${withOrders > 0 ? 'stat-green' : ''}`}>{withOrders}</div>
-        <div className="stat-label">With Orders</div>
+        <div className="stat-label">Active Orders</div>
       </div>
       <div className="stat-card fade-in stagger-3">
-        <div className={`stat-value ${yellow > 0 ? 'stat-yellow' : ''}`}>{total - withOrders}</div>
-        <div className="stat-label">Unscheduled</div>
+        <div className="stat-value">{total - withOrders}</div>
+        <div className="stat-label">Idle Units</div>
       </div>
     </div>
   );
@@ -905,12 +1010,12 @@ function StatsBar({ equipments, role }) {
    MAIN COMPONENT
 ───────────────────────────────────────────── */
 export default function CentralLocationSetup({ role }) {
-  const [newEquipments, setNewEquipments]   = useState([{ id: 1 }]);
-  const [allEquipments, setAllEquipments]   = useState([]);
-  const [editedStates,  setEditedStates]    = useState({});
-  const [ordersInput,   setOrdersInput]     = useState({});
-  const [message,       setMessage]         = useState('');
-  const [isError,       setIsError]         = useState(false);
+  const [newEquipments, setNewEquipments] = useState([{ id: 1 }]);
+  const [allEquipments, setAllEquipments] = useState([]);
+  const [editedStates,  setEditedStates]  = useState({});
+  const [ordersInput,   setOrdersInput]   = useState({});
+  const [message,       setMessage]       = useState('');
+  const [isError,       setIsError]       = useState(false);
   const msgTimer = useRef(null);
 
   const showMsg = (text, error = false) => {
@@ -932,8 +1037,9 @@ export default function CentralLocationSetup({ role }) {
 
   useEffect(() => { fetchEquipments(); }, [role]);
 
-  /* Admin */
-  const handleNewEquipmentChange = (index, value) => {
+  /* ── Admin ── */
+  const handleNewEquipmentChange = (index, raw) => {
+    const value = sanitizeNumberInput(raw);
     const updated = [...newEquipments];
     updated[index].id = value;
     setNewEquipments(updated);
@@ -951,53 +1057,82 @@ export default function CentralLocationSetup({ role }) {
 
   const handleCreate = async e => {
     e.preventDefault();
+
+    // Client-side duplicate check before even calling the server
+    const ids = newEquipments.map(eq => eq.id);
+    const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+    if (dupes.length > 0) {
+      showMsg(`You have entered the same ID more than once: ${[...new Set(dupes)].join(', ')}. Please use unique IDs.`, true);
+      return;
+    }
+
     try {
       const res  = await fetch('http://localhost:5000/api/centrallocation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Role': role },
         body: JSON.stringify({ equipments: newEquipments })
       });
+
+      if (!res.ok) {
+        const text = await res.text();
+        // Extract the conflicting IDs from the server message if present
+        const conflictMatch = text.match(/already exist: ([\d, ]+)/);
+        if (conflictMatch) {
+          showMsg(`Equipment ID${conflictMatch[1].includes(',') ? 's' : ''} ${conflictMatch[1].trim()} already registered. Please choose different IDs.`, true);
+        } else {
+          showMsg('Could not register equipment. Please check the IDs and try again.', true);
+        }
+        return;
+      }
+
       const data = await res.json();
       showMsg(data.message);
       setAllEquipments(data.equipments);
       setNewEquipments([{ id: newEquipments.length + 1 }]);
-    } catch (err) { showMsg(err.message, true); }
+    } catch (err) { showMsg('Failed to connect to the server. Please try again.', true); }
   };
 
-  /* Worker */
+  /* ── Worker ── */
   const handleStateChange = (equipmentId, newState) => {
     setEditedStates(prev => ({ ...prev, [equipmentId]: newState }));
   };
 
-  const handleSaveStates = async () => {
+  const handleSaveUnitState = async (equipmentId) => {
+    const state = editedStates[equipmentId];
+    if (!state) return;
     try {
-      await Promise.all(
-        Object.entries(editedStates).map(([id, state]) =>
-          fetch(`http://localhost:5000/api/centrallocation/record/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Role': role },
-            body: JSON.stringify({ state })
-          })
-        )
-      );
-      setEditedStates({});
-      showMsg('States updated successfully');
+      const res = await fetch(`http://localhost:5000/api/centrallocation/record/${equipmentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Role': role },
+        body: JSON.stringify({ state })
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        showMsg(text || 'State rejected by server.', true);
+        return;
+      }
+      setEditedStates(prev => { const n = { ...prev }; delete n[equipmentId]; return n; });
+      showMsg(`Unit #${equipmentId} updated → ${state}`);
       await fetchEquipments();
     } catch (err) { showMsg(err.message, true); }
   };
 
-  /* Supervisor */
+  /* ── Supervisor ── */
   const handleSchedule = async (eqId) => {
     try {
-      const number = ordersInput[eqId];
-      if (!number || number < 1) return alert('Enter a positive number of orders.');
+      const number = sanitizeNumberInput(ordersInput[eqId] ?? 1);
       const res  = await fetch(`http://localhost:5000/api/centrallocation/schedule/${eqId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Role': role },
         body: JSON.stringify({ numberOfOrders: number })
       });
+      if (!res.ok) {
+        const err = await res.text();
+        showMsg(err || 'Failed to schedule orders.', true);
+        return;
+      }
       const data = await res.json();
-      showMsg(data.message ?? 'Orders scheduled');
+      showMsg(`Scheduled ${number} order(s) for Unit #${eqId}. Total: ${data.totalOrders}`);
       await fetchEquipments();
     } catch (err) { showMsg(err.message, true); }
   };
@@ -1033,7 +1168,6 @@ export default function CentralLocationSetup({ role }) {
             <p>{SUBTITLES[role]}</p>
           </div>
 
-          {/* ── STATS ── */}
           <StatsBar equipments={allEquipments} role={role} />
 
           {/* ════════════════════════════════
@@ -1063,7 +1197,8 @@ export default function CentralLocationSetup({ role }) {
                             type="number"
                             value={eq.id}
                             min="1"
-                            onChange={e => handleNewEquipmentChange(idx, Number(e.target.value))}
+                            onChange={e => handleNewEquipmentChange(idx, e.target.value)}
+                            onBlur={e => handleNewEquipmentChange(idx, e.target.value)}
                             placeholder="ID"
                           />
                           {newEquipments.length > 1 && (
@@ -1128,30 +1263,48 @@ export default function CentralLocationSetup({ role }) {
                       <div>
                         <div className="eq-name">Unit {eq.id}</div>
                         <div className="eq-meta">
-                          {eq.histProductionStates?.length ?? 0} state{(eq.histProductionStates?.length ?? 0) !== 1 ? 's' : ''} recorded
+                          {eq.completedOrderCount ?? 0} / {eq.totalOrderCount ?? 0} orders completed
                         </div>
                       </div>
                     </div>
-                    {eq.currentOrderId != null && (
-                      <span className="order-tag current">
-                        <span className="order-tag-label">Active</span>
-                        #{eq.currentOrderId}
-                      </span>
+                    {eq.currentOrderId != null && eq.currentOrderState && (
+                      <StateIndicator state={eq.currentOrderState} />
                     )}
                   </div>
 
                   <div className="eq-block-body">
-                    <div className="section-label">Schedule Production Orders</div>
+
+                    {/* Current order sequence progress */}
+                    {eq.currentOrderId != null && (
+                      <>
+                        <div className="section-label">
+                          Order #{eq.currentOrderId} — sequence progress
+                        </div>
+                        <SequenceStepper currentStateIndex={eq.currentOrderStateIndex ?? 0} />
+                      </>
+                    )}
+
+                    <div className="divider" />
+
+                    {/* Schedule more orders */}
+                    <div className="section-label">Add More Orders</div>
                     <div className="inline-row">
                       <input
                         type="number"
                         min="1"
-                        placeholder="Number of orders to schedule"
+                        placeholder="Number of orders to add"
                         value={ordersInput[eq.id] ?? ''}
-                        onChange={e => setOrdersInput(prev => ({ ...prev, [eq.id]: Number(e.target.value) }))}
+                        onChange={e => {
+                          const val = sanitizeNumberInput(e.target.value);
+                          setOrdersInput(prev => ({ ...prev, [eq.id]: val }));
+                        }}
+                        onBlur={e => {
+                          const val = sanitizeNumberInput(e.target.value);
+                          setOrdersInput(prev => ({ ...prev, [eq.id]: val }));
+                        }}
                       />
                       <button className="btn btn-primary" onClick={() => handleSchedule(eq.id)}>
-                        Schedule
+                        + Schedule
                       </button>
                     </div>
 
@@ -1175,14 +1328,19 @@ export default function CentralLocationSetup({ role }) {
               )}
 
               {allEquipments.map((eq, i) => {
-                const currentState    = editedStates[eq.id] ?? eq.currentProductionState;
-                const isDirty        = !!editedStates[eq.id];
-                const totalOrders    = eq.scheduledOrders?.length ?? 0;
-                const currentIdx     = eq.currentOrderId != null
+                const currentState    = eq.currentProductionState;
+                const nextExpected    = eq.nextExpectedState;
+                const isDirty         = !!editedStates[eq.id];
+                // Default to currentState so worker sees where they are and must change it
+                const selectedState   = editedStates[eq.id] ?? currentState;
+                const totalOrders     = eq.scheduledOrders?.length ?? 0;
+                const currentIdx      = eq.currentOrderId != null
                   ? (eq.scheduledOrders?.indexOf(eq.currentOrderId) ?? 0)
                   : totalOrders;
                 const completedOrders = currentIdx;
-                const pct            = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+                const pct             = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+                // Save is only enabled when worker has selected the correct next state
+                const canSave         = isDirty && editedStates[eq.id] === nextExpected;
 
                 return (
                   <div
@@ -1225,42 +1383,59 @@ export default function CentralLocationSetup({ role }) {
 
                       <div className="divider" />
 
-                      <div className="state-section-header"><span className={`state-dot ${currentState}`} /><span className="state-section-title">Production State</span></div>
-                      <div className="select-wrap">
+                      {/* Banner shows what the next required state is */}
+                      <NextStateBanner nextExpectedState={nextExpected} />
+
+                      {/* Dropdown: starts at currentState, only nextExpectedState is enabled to select */}
+                      <div className="state-section-header">
+                        <span className={`state-dot ${selectedState}`} />
+                        <span className="state-section-title">Production State</span>
+                      </div>
+                      <div className="select-wrap" style={{ marginBottom: 10 }}>
                         <select
-                          className={`state-${currentState}`}
-                          value={currentState}
+                          className={`state-${selectedState}`}
+                          value={selectedState}
                           onChange={e => handleStateChange(eq.id, e.target.value)}
+                          disabled={!nextExpected}
                         >
-                          <option value="Red">🔴 Standing Still</option>
-                          <option value="Yellow">🟡 Starting Up / Winding Down</option>
-                          <option value="Green">🟢 Producing Normally</option>
+                          {['Red', 'Yellow', 'Green'].map(state => (
+                            <option
+                              key={state}
+                              value={state}
+                              disabled={state !== currentState && state !== nextExpected}
+                            >
+                              {state === 'Red'    && '🔴 Standing Still'}
+                              {state === 'Yellow' && '🟡 Starting Up / Winding Down'}
+                              {state === 'Green'  && '🟢 Producing Normally'}
+                              {state !== currentState && state !== nextExpected ? ' (locked)' : ''}
+                            </option>
+                          ))}
                         </select>
                         <span className="select-chevron">▾</span>
                       </div>
+
+                      {/* Per-unit save button */}
+                      <button
+                        className="btn btn-success"
+                        style={{ width: '100%', padding: '10px' }}
+                        onClick={() => handleSaveUnitState(eq.id)}
+                        disabled={!canSave}
+                      >
+                        {!nextExpected
+                          ? 'No Active Order'
+                          : canSave
+                            ? `Confirm → ${nextExpected}`
+                            : `Select "${nextExpected}" to confirm`}
+                      </button>
 
                       <HistoryStrip states={eq.histProductionStates} />
                     </div>
                   </div>
                 );
               })}
-
-              {allEquipments.length > 0 && (
-                <button
-                  className="btn btn-success btn-block fade-in"
-                  onClick={handleSaveStates}
-                  disabled={Object.keys(editedStates).length === 0}
-                  style={{ marginTop: 8 }}
-                >
-                  {Object.keys(editedStates).length === 0
-                    ? 'No Changes to Save'
-                    : `Save ${Object.keys(editedStates).length} Change${Object.keys(editedStates).length > 1 ? 's' : ''}`}
-                </button>
-              )}
             </div>
           )}
 
-          {/* ── TOAST MESSAGE ── */}
           {message && (
             <div className={`toast ${isError ? 'error' : ''}`}>
               {isError ? '✕' : '✓'} {message}

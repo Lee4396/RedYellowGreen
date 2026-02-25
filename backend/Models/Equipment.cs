@@ -8,12 +8,14 @@ namespace backend.Models
 
         public List<Order> Orders { get; set; } = new();
 
+        // History of all distinct production states recorded across all orders
         public List<ProductionState> HistProductionStates { get; set; } = new() { ProductionState.Red };
 
         public Order? CurrentOrder { get; private set; }
 
-        // Tracks how many history entries existed when the current order started
-        private int _currentOrderHistStart = 0;
+        // The next state the Worker must set — derived from the current order's sequence
+        // Returns null if there is no active order or the order is complete
+        public ProductionState? NextExpectedState => CurrentOrder?.NextExpectedState;
 
         public Equipment(int id)
         {
@@ -22,14 +24,37 @@ namespace backend.Models
 
         public void ScheduleOrders(List<Order> orders)
         {
-            Orders = orders ?? new();
-            CurrentOrder = Orders.FirstOrDefault();
-            CurrentProductionState = ProductionState.Red;
-            _currentOrderHistStart = HistProductionStates.Count - 1; // Red is already in history
+            if (orders == null || orders.Count == 0) return;
+
+            Orders.AddRange(orders);
+
+            // Only set CurrentOrder if there isn't one already active
+            if (CurrentOrder == null)
+            {
+                CurrentOrder = Orders.FirstOrDefault(o => !o.IsComplete);
+                CurrentProductionState = ProductionState.Red;
+            }
         }
 
-        public void RecordState(ProductionState newState)
+        // Returns false if the state does not match the expected next state
+        public bool RecordState(ProductionState newState)
         {
+            // If there is an active order, enforce the sequence
+            if (CurrentOrder != null)
+            {
+                var expected = CurrentOrder.NextExpectedState;
+
+                // If order is already complete or state doesn't match sequence, reject
+                if (expected == null || newState != expected)
+                {
+                    return false;
+                }
+
+                // Advance the order's position in the sequence
+                CurrentOrder.AdvanceState();
+            }
+
+            // Add to history only if different from the last recorded state
             if (HistProductionStates.Last() != newState)
             {
                 HistProductionStates.Add(newState);
@@ -37,38 +62,29 @@ namespace backend.Models
 
             CurrentProductionState = newState;
 
-            if (CurrentOrder != null)
+            // Check if current order is now complete
+            if (CurrentOrder != null && CurrentOrder.IsComplete)
             {
-                // How many distinct states recorded since this order started
-                int statesRecordedForOrder = HistProductionStates.Count - _currentOrderHistStart;
-
-                if (statesRecordedForOrder >= CurrentOrder.ProductionStates.Count)
-                {
-                    MoveToNextOrder();
-                }
+                MoveToNextOrder();
             }
+
+            return true;
         }
 
         private void MoveToNextOrder()
         {
-            if (Orders == null || Orders.Count == 0 || CurrentOrder == null)
-            {
-                CurrentOrder = null;
-                return;
-            }
+            // Find the next incomplete order
+            var nextOrder = Orders
+                .SkipWhile(o => o != CurrentOrder)
+                .Skip(1)
+                .FirstOrDefault(o => !o.IsComplete);
 
-            int currentIndex = Orders.IndexOf(CurrentOrder);
+            CurrentOrder = nextOrder;
 
-            if (currentIndex >= 0 && currentIndex < Orders.Count - 1)
+            if (CurrentOrder != null)
             {
-                CurrentOrder = Orders[currentIndex + 1];
+                // Next order always starts at Red
                 CurrentProductionState = ProductionState.Red;
-                // Mark where in history this new order starts
-                _currentOrderHistStart = HistProductionStates.Count - 1;
-            }
-            else
-            {
-                CurrentOrder = null;
             }
         }
     }

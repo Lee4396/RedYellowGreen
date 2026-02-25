@@ -11,12 +11,37 @@ namespace backend.Controllers
     {
         private static readonly List<CentralLocation> _locations = new();
 
+        // --------------------
+        // POST: Admin creates equipments
+        // --------------------
         [HttpPost]
         public IActionResult Create([FromBody] CentralLocationDto dto)
         {
             var roleHeader = Request.Headers["Role"].FirstOrDefault();
             if (!Enum.TryParse<Role>(roleHeader, out var role) || role != Role.Admin)
                 return Forbid();
+
+            var allExistingIds = _locations.SelectMany(loc => loc.Equipments)
+                                           .Select(e => e.Id)
+                                           .ToHashSet();
+
+            var incomingIds = dto.Equipments?.Select(e => e.Id).ToList() ?? new();
+
+            // Check for duplicates within the submitted list
+            var incomingDuplicates = incomingIds
+                .GroupBy(id => id)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (incomingDuplicates.Any())
+                return BadRequest($"Duplicate equipment IDs in request: {string.Join(", ", incomingDuplicates)}.");
+
+            // Check for conflicts with already registered equipments
+            var conflicts = incomingIds.Where(id => allExistingIds.Contains(id)).ToList();
+
+            if (conflicts.Any())
+                return BadRequest($"Equipment IDs already exist: {string.Join(", ", conflicts)}.");
 
             var centralLocation = new CentralLocation();
 
@@ -39,6 +64,9 @@ namespace backend.Controllers
             });
         }
 
+        // --------------------
+        // GET: Role-based equipment view
+        // --------------------
         [HttpGet]
         public IActionResult GetAllEquipments()
         {
@@ -59,7 +87,13 @@ namespace backend.Controllers
                 {
                     e.Id,
                     HistProductionStates = e.HistProductionStates,
-                    CurrentOrderId = e.CurrentOrder?.Id
+                    CurrentOrderId = e.CurrentOrder?.Id,
+                    // Current state within the active order's sequence
+                    CurrentOrderState = e.CurrentOrder?.CurrentState.ToString(),
+                    // Index within the sequence (0–4) so frontend can visualize progress
+                    CurrentOrderStateIndex = e.CurrentOrder?.CurrentStateIndex,
+                    TotalOrderCount = e.Orders.Count,
+                    CompletedOrderCount = e.Orders.Count(o => o.IsComplete)
                 }));
             }
 
@@ -71,13 +105,18 @@ namespace backend.Controllers
                     CurrentProductionState = e.CurrentProductionState.ToString(),
                     CurrentOrderId = e.CurrentOrder?.Id,
                     ScheduledOrders = e.Orders.Select(o => o.Id).ToList(),
-                    HistProductionStates = e.HistProductionStates
+                    HistProductionStates = e.HistProductionStates,
+                    // The one state the Worker must set next — null if no active order
+                    NextExpectedState = e.NextExpectedState?.ToString()
                 }));
             }
 
             return Forbid();
         }
 
+        // --------------------
+        // PUT: Worker records a state — must match the expected next state
+        // --------------------
         [HttpPut("record/{equipmentId}")]
         public IActionResult RecordState(int equipmentId, [FromBody] RecordStateDto dto)
         {
@@ -90,19 +129,26 @@ namespace backend.Controllers
             if (equipment == null) return NotFound();
 
             if (!Enum.TryParse<ProductionState>(dto.State, out var newState))
-                return BadRequest();
+                return BadRequest("Invalid production state.");
 
-            equipment.RecordState(newState);
+            bool accepted = equipment.RecordState(newState);
+
+            if (!accepted)
+                return BadRequest($"Invalid state transition. Expected: {equipment.NextExpectedState?.ToString() ?? "none"}.");
 
             return Ok(new
             {
                 equipment.Id,
                 CurrentOrderId = equipment.CurrentOrder?.Id,
-                CurrentProductionState = equipment.CurrentProductionState,
-                HistProductionStates = equipment.HistProductionStates
+                CurrentProductionState = equipment.CurrentProductionState.ToString(),
+                HistProductionStates = equipment.HistProductionStates,
+                NextExpectedState = equipment.NextExpectedState?.ToString()
             });
         }
 
+        // --------------------
+        // PUT: Supervisor schedules orders — can be called multiple times
+        // --------------------
         [HttpPut("schedule/{equipmentId}")]
         public IActionResult ScheduleOrders(int equipmentId, [FromBody] ScheduleOrdersDto dto)
         {
@@ -114,25 +160,31 @@ namespace backend.Controllers
                                       .FirstOrDefault(e => e.Id == equipmentId);
             if (equipment == null) return NotFound();
 
-            if (equipment.Orders.Count > 0)
-                return BadRequest("Orders already scheduled");
+            if (dto.NumberOfOrders < 1)
+                return BadRequest("Number of orders must be at least 1.");
 
-            var defaultSequence = new List<ProductionState> { ProductionState.Red, ProductionState.Yellow, ProductionState.Green, ProductionState.Yellow, ProductionState.Red };
+            // Generate order IDs that are unique across ALL equipments globally
+            int nextId = _locations.SelectMany(loc => loc.Equipments)
+                                   .SelectMany(e => e.Orders)
+                                   .Select(o => o.Id)
+                                   .DefaultIfEmpty(0)
+                                   .Max() + 1;
 
-            var orders = Enumerable.Range(1, dto.NumberOfOrders)
-                                   .Select(i => new Order
-                                   {
-                                       Id = i,
-                                       EquipmentId = equipmentId,
-                                       ProductionStates = defaultSequence
-                                   }).ToList();
+            var newOrders = Enumerable.Range(nextId, dto.NumberOfOrders)
+                                      .Select(i => new Order
+                                      {
+                                          Id = i,
+                                          EquipmentId = equipmentId
+                                          // RequiredSequence is static on Order — no need to assign
+                                      }).ToList();
 
-            equipment.ScheduleOrders(orders);
+            equipment.ScheduleOrders(newOrders);
 
             return Ok(new
             {
                 equipment.Id,
-                ScheduledOrders = equipment.Orders.Select(o => o.Id)
+                ScheduledOrders = equipment.Orders.Select(o => o.Id),
+                TotalOrders = equipment.Orders.Count
             });
         }
     }
