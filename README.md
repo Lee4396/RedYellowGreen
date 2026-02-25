@@ -39,3 +39,12 @@ The app will open at `http://localhost:3000`.
 | 🔴 Red | Standing Still |
 | 🟡 Yellow | Starting Up / Winding Down |
 | 🟢 Green | Producing Normally |
+
+## Admin View
+![Admin](images/Admin.png)
+
+## Supervisor View
+![Supervisor](images/Supervisor.png)
+
+## Worker View
+![Worker](images/Worker.png)
